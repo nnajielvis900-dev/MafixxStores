@@ -1,0 +1,21 @@
+# 3-node MongoDB replica set: 1 primary + 2 secondaries (automatic failover).
+# Start: docker compose up -d      Stop + delete: docker compose down -v
+services:
+  mongo1:
+    image: mongo:7.0
+    container_name: mongo1
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports: ["27018:27017"]
+    volumes: ["./scripts:/scripts:ro", "../../portfolio-4-nosql/data:/seed:ro"]
+  mongo2:
+    image: mongo:7.0
+    container_name: mongo2
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports: ["27019:27017"]
+    volumes: ["./scripts:/scripts:ro"]
+  mongo3:
+    image: mongo:7.0
+    container_name: mongo3
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports: ["27020:27017"]
+    volumes: ["./scripts:/scripts:ro"]

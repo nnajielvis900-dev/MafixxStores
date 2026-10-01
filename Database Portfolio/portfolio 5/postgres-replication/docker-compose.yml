@@ -1,0 +1,49 @@
+# PostgreSQL primary + streaming replica (read-only copy that follows the primary).
+# Start:  docker compose up -d        Stop + delete:  docker compose down -v
+services:
+  pg-primary:
+    image: postgres:16
+    container_name: pg-primary
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mafixx
+    command: ["postgres", "-c", "wal_level=replica", "-c", "max_wal_senders=10", "-c", "max_replication_slots=10", "-c", "hot_standby=on"]
+    ports:
+      - "5433:5432"          # 5433 so it does not clash with your normal PostgreSQL on 5432
+    volumes:
+      - pg_primary_data:/var/lib/postgresql/data
+      - ./primary-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mafixx"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  pg-replica:
+    image: postgres:16
+    container_name: pg-replica
+    depends_on:
+      pg-primary:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: replpass
+    entrypoint: ["bash", "-c"]
+    command:
+      - |
+        set -e
+        PGDATA=/var/lib/postgresql/data
+        if [ ! -s "$$PGDATA/PG_VERSION" ]; then
+          echo "Cloning the primary with pg_basebackup..."
+          chown -R postgres:postgres "$$PGDATA"
+          chmod 700 "$$PGDATA"
+          gosu postgres pg_basebackup -h pg-primary -U replicator -D "$$PGDATA" -Fp -Xs -P -R
+        fi
+        exec gosu postgres postgres -c hot_standby=on
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg_replica_data:/var/lib/postgresql/data
+
+volumes:
+  pg_primary_data:
+  pg_replica_data:

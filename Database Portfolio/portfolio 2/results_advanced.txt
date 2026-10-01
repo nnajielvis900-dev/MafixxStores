@@ -1,0 +1,83 @@
+=== View: customer lifetime value (reusable business logic) ===
+CREATE VIEW
+ customer_id |   full_name    |    city    | orders_placed | total_spent 
+-------------+----------------+------------+---------------+-------------
+         378 | Ifeoma Adeyemi | Asaba      |            27 | 24980300.00
+        1858 | Chioma Ojo     | Onitsha    |            29 | 24445400.00
+        1430 | Chioma Onyeka  | Kaduna     |            35 | 23300450.00
+        1678 | Amaka Anyanwu  | Ikeja      |            33 | 21897550.00
+         891 | Ifeoma Afolabi | Benin City |            29 | 21416200.00
+         792 | Chioma Adeyemi | Kano       |            34 | 21365000.00
+         969 | Damilola Ojo   | Lagos      |            26 | 21235150.00
+        1269 | Adaeze Bello   | Abeokuta   |            37 | 21154450.00
+         407 | Nneka Sanni    | Onitsha    |            21 | 21003250.00
+        1351 | Ebuka Lawal    | Awka       |            25 | 20901500.00
+(10 rows)
+
+=== Window function: rank products by revenue WITHIN each category (top 3 each) ===
+     category_name      |        product_name         |   revenue    | rank_in_category 
+------------------------+-----------------------------+--------------+------------------
+ Beauty & Personal Care | Lip Gloss Set               |  20929600.00 |                1
+ Beauty & Personal Care | Face Wash                   |  20524650.00 |                2
+ Beauty & Personal Care | Body Lotion 400ml (Pack 2)  |  20140000.00 |                3
+ Computing              | Kingston 256GB SSD (Pack 2) | 345204900.00 |                1
+ Computing              | USB-C Hub 7-in-1 (Pack 3)   | 330134350.00 |                2
+ Computing              | Dell Inspiron 14 (Pack 3)   | 329740800.00 |                3
+ Electronics            | Ring Light Stand (Pack 2)   | 193043200.00 |                1
+ Electronics            | LG 32in TV                  | 185062300.00 |                2
+ Electronics            | JBL Bluetooth Speaker       | 158559600.00 |                3
+ Fashion                | Wrist Watch                 |  35843600.00 |                1
+ Fashion                | Sneakers Unisex (Pack 2)    |  35511800.00 |                2
+ Fashion                | School Bag (Pack 2)         |  34476750.00 |                3
+ Groceries              | Garri 10kg (Pack 3)         |  45625250.00 |                1
+ Groceries              | Indomie Noodles Carton      |  41646000.00 |                2
+ Groceries              | Peak Milk Tin Carton        |  38088450.00 |                3
+ Home & Kitchen         | Bedsheet Set (Pack 2)       | 132766200.00 |                1
+ Home & Kitchen         | Dinner Plates 12pc (Pack 2) | 119481950.00 |                2
+ Home & Kitchen         | Rice Cooker 1.8L            | 116586550.00 |                3
+ Phones & Tablets       | Itel A70 (Pack 2)           | 336402900.00 |                1
+ Phones & Tablets       | Oppo A58                    | 312154500.00 |                2
+ Phones & Tablets       | iPhone 13 (Refurb) (Pack 3) | 287496500.00 |                3
+ Sports & Fitness       | Running Shoes (Pack 2)      |  57879000.00 |                1
+ Sports & Fitness       | Jersey Replica (Pack 2)     |  56273500.00 |                2
+ Sports & Fitness       | Yoga Mat (Pack 2)           |  56036850.00 |                3
+(24 rows)
+
+=== Running total of monthly revenue (window function over the materialized view) ===
+   month    |    revenue    | cumulative_revenue 
+------------+---------------+--------------------
+ 2024-01-01 |   90569000.00 |        90569000.00
+ 2024-02-01 |  126627050.00 |       217196050.00
+ 2024-03-01 |  197767700.00 |       414963750.00
+ 2024-04-01 |  227927200.00 |       642890950.00
+ 2024-05-01 |  313534900.00 |       956425850.00
+ 2024-06-01 |  346036800.00 |      1302462650.00
+ 2024-07-01 |  410065050.00 |      1712527700.00
+ 2024-08-01 |  440295650.00 |      2152823350.00
+ 2024-09-01 |  590839450.00 |      2743662800.00
+ 2024-10-01 |  561268550.00 |      3304931350.00
+ 2024-11-01 |  582502650.00 |      3887434000.00
+ 2024-12-01 |  591519050.00 |      4478953050.00
+ 2025-01-01 |  769418900.00 |      5248371950.00
+ 2025-02-01 |  719091950.00 |      5967463900.00
+ 2025-03-01 |  854953200.00 |      6822417100.00
+ 2025-04-01 |  862869750.00 |      7685286850.00
+ 2025-05-01 |  988306700.00 |      8673593550.00
+ 2025-06-01 | 1018710750.00 |      9692304300.00
+ 2025-07-01 | 1040540300.00 |     10732844600.00
+ 2025-08-01 | 1043341150.00 |     11776185750.00
+ 2025-09-01 |  831397650.00 |     12607583400.00
+ 2025-10-01 |  630472150.00 |     13238055550.00
+ 2025-11-01 |  569140050.00 |     13807195600.00
+ 2025-12-01 |  599985600.00 |     14407181200.00
+ 2026-01-01 |  626202700.00 |     15033383900.00
+ 2026-02-01 |  524829750.00 |     15558213650.00
+ 2026-03-01 |  610080100.00 |     16168293750.00
+ 2026-04-01 |  554047300.00 |     16722341050.00
+ 2026-05-01 |  630277750.00 |     17352618800.00
+ 2026-06-01 |  541822750.00 |     17894441550.00
+ 2026-07-01 |  613246600.00 |     18507688150.00
+ 2026-08-01 |  567539550.00 |     19075227700.00
+ 2026-09-01 |  372446550.00 |     19447674250.00
+(33 rows)
+

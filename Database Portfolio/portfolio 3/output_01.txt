@@ -1,0 +1,82 @@
+UPDATE 1
+
+===== A. SUCCESSFUL TRANSACTION -> COMMIT: customer 1 buys 2 x product 9001 =====
+-- Stock BEFORE:
+ product_id | stock_qty 
+------------+-----------
+       9001 |         5
+(1 row)
+
+BEGIN
+ new_order_id 
+--------------
+        50002
+(1 row)
+
+COMMIT
+-- Stock AFTER COMMIT (should be 3), and the order + log rows that were saved:
+ product_id | stock_qty 
+------------+-----------
+       9001 |         3
+(1 row)
+
+ order_id | customer_id | status  | total_amount 
+----------+-------------+---------+--------------
+    50002 |           1 | Pending |    200000.00
+(1 row)
+
+ log_id | product_id | change_qty |   reason    |         logged_at          
+--------+------------+------------+-------------+----------------------------
+      2 |       9001 |         -2 | Order 50002 | 2026-10-01 08:51:43.169265
+(1 row)
+
+
+===== B. FAILING TRANSACTION -> ROLLBACK: customer 1 tries to buy 10 (only 3 in stock) =====
+BEGIN
+-- (The line above fails with: Insufficient stock... The transaction is now aborted.)
+ROLLBACK
+-- Stock is unchanged (still 3) and no new order was created:
+ product_id | stock_qty 
+------------+-----------
+       9001 |         3
+(1 row)
+
+ latest_order_id 
+-----------------
+           50002
+(1 row)
+
+
+===== C. MANUAL ROLLBACK: change data, look at it, then undo it =====
+BEGIN
+UPDATE 1
+-- Inside the transaction (stock shows 0):
+ product_id | stock_qty 
+------------+-----------
+       9002 |         0
+(1 row)
+
+ROLLBACK
+-- After ROLLBACK (back to 10):
+ product_id | stock_qty 
+------------+-----------
+       9002 |        10
+(1 row)
+
+
+===== D. SAVEPOINT: undo only part of a transaction =====
+BEGIN
+UPDATE 1
+SAVEPOINT
+UPDATE 1
+ROLLBACK
+COMMIT
+-- Expected: 9 (only step 1 survived)
+ product_id | stock_qty 
+------------+-----------
+       9002 |         9
+(1 row)
+
+
+===== E. CONSTRAINT protects data integrity: negative stock is rejected =====
+-- (error above is expected: violates check constraint products_stock_qty_check)
